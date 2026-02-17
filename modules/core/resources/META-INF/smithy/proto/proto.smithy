@@ -17,10 +17,39 @@ use alloy#openEnum
         protoEnumFormat
         protoEnabled
         uncheckedExamples
+        grpcError
     ]
 )
 @trait(selector: "service")
 structure grpc {}
+
+intEnum ErrorCode {
+    OK = 0
+    CANCELLED = 1
+    UNKNOWN = 2
+    INVALID_ARGUMENT = 3
+    DEADLINE_EXCEEDED = 4
+    NOT_FOUND = 5
+    ALREADY_EXISTS = 6
+    PERMISSION_DENIED = 7
+    RESOURCE_EXHAUSTED = 8
+    FAILED_PRECONDITION = 9
+    ABORTED = 10
+    OUT_OF_RANGE = 11
+    UNIMPLEMENTED = 12
+    INTERNAL = 13
+    UNAVAILABLE = 14
+    DATA_LOSS = 15
+    UNAUTHENTICATED = 16
+}
+
+@trait(selector: "structure[trait|smithy.api#error]")
+structure grpcError {
+    @required
+    errorCode: ErrorCode
+
+    message: String
+}
 
 /// Marks an explicit index to be used for a structure member when it is
 /// interpreted as protobuf. For example:
@@ -194,3 +223,21 @@ structure protoCompactYearMonth {}
     )"
 )
 structure protoCompactMonthDay {}
+
+
+// gRPC structures to encode/decode error details
+// Figure out if this is the best way to do this.
+//
+// https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto
+// https://github.com/protocolbuffers/protobuf/blob/main/src/google/protobuf/any.proto
+list StatusDetails {
+    member: StatusDetailsEntry
+}
+
+structure StatusDetailsEntry {
+    @required
+    typeUrl: String
+
+    @required
+    bytes: Blob
+}
